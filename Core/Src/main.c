@@ -35,6 +35,7 @@
 #include "lwshell/lwshell_user.h"
 #include "OsAPIs.h"
 #include "SysTickTimer.h"
+#include "TCB.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -77,7 +78,7 @@ static Button btn1;
 lwrb_t usart_tx_rb;
 uint8_t usart_tx_rb_data[128];
 
-volatile size_t usart_tx_dma_current_len;
+volatile size_t usart_tx_dma_current_len = 0;
 uint8_t usart_rx_dma_buffer[64];
 
 /* USER CODE END PV */
@@ -90,7 +91,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static int lwprintf_self_func(int ch, lwprintf_t* p) {
+int lwprintf_self_func(int ch, lwprintf_t* p) {
     uint8_t c = (uint8_t)ch;
 
     /* Don't print zero */
@@ -170,19 +171,20 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 //uart HT TC IDLE event will trigger this callback, dma mode enable
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
+  __disable_irq();
   if(huart == &huart1) {
-#if 0
     usart_rx_check(Size);
 
     if (usart_tx_dma_current_len == 0 && (usart_tx_dma_current_len = lwrb_get_linear_block_read_length(&usart_tx_rb)) > 0) {
-      lwshell_input(lwrb_get_linear_block_read_address(&usart_tx_rb), usart_tx_dma_current_len);
+      //OS_SetEvent(TASK_5MS, EVT_TRIGGER_5MS_TASK);
+      //lwshell_input(lwrb_get_linear_block_read_address(&usart_tx_rb), usart_tx_dma_current_len);
 
-      lwrb_skip(&usart_tx_rb, usart_tx_dma_current_len);
-      usart_tx_dma_current_len = 0;
+      //lwrb_skip(&usart_tx_rb, usart_tx_dma_current_len);
+      //usart_tx_dma_current_len = 0;
     }
-#endif
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
   }
+  __enable_irq();
 }
 
 uint8_t read_button_gpio(uint8_t button_id) {

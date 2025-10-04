@@ -8,10 +8,10 @@
 #include "lwprintf/lwprintf.h"
 #include "usart.h"
 
-static void lwshell_user_output(const char* str, struct lwshell* lwobj) {
+void lwshell_user_output(const char* str, struct lwshell* lwobj) {
   (void)lwobj;
-  lwprintf("%s", str);
-  //HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
+  //lwprintf("%s", str);
+  HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
 }
 
 static int32_t hello_cmd(int32_t argc, char** argv) {
