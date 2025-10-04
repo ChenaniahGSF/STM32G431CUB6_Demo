@@ -9,6 +9,7 @@
 #include "main.h"
 #include "lwshell/lwshell.h"
 #include "lwrb/lwrb.h"
+#include "logger.h"
 
 extern volatile size_t usart_tx_dma_current_len;
 extern lwrb_t usart_tx_rb;
@@ -73,7 +74,7 @@ TASK(TASK_5MS)
 {
   const OsEventMaskType OsWaitEventMask = (OsEventMaskType) EVT_TRIGGER_5MS_TASK;
 
-  (void)OS_SetRelAlarm(ALARM_5MS_TASK, 0, 2);
+  (void)OS_SetRelAlarm(ALARM_5MS_TASK, 0, 5);
 
   for(;;)
   {

@@ -22,7 +22,7 @@
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "lwprintf/lwprintf.h"
+#include "logger.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,7 +90,7 @@ void HardFault_Handler(void)
   /* USER CODE BEGIN HardFault_IRQn 0 */
   uint32_t hfsr = SCB->HFSR;
   uint32_t cfsr = SCB->CFSR;
-  lwprintf("hfsr = %d, cfsr = %d\r\n", hfsr, cfsr);
+  logger_info("hfsr = 0x%lx, cfsr = 0x%lx", hfsr, cfsr);
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {

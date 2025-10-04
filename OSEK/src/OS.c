@@ -60,7 +60,8 @@ void OS_StartOS(OsAppModeType Mode)
       const uint32 stack_size = OCB_Cfg.pTcb[tcbIdx]->pstack_top - OCB_Cfg.pTcb[tcbIdx]->pstack_bot + sizeof(uint32);
       for(uint32 Idx=0u;Idx < stack_size;Idx++)
       {
-        *(uint32*)((OCB_Cfg.pTcb[tcbIdx]->pstack_bot) + Idx) = (uint32)0xAAAAAAAAu;
+        //*(uint32*)((OCB_Cfg.pTcb[tcbIdx]->pstack_bot) + Idx) = (uint32)0xAAAAAAAAu;
+        *(uint8*)((OCB_Cfg.pTcb[tcbIdx]->pstack_bot) + Idx) = (uint8)0xAAu;
       }
 
       /* Set default tasks priorities */

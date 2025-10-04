@@ -26,7 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "lwprintf/lwprintf.h"
+#include "logger.h"
 #include "lwrb/lwrb.h"
 #include "ee24.h"
 #include "spif.h"
@@ -91,26 +91,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int lwprintf_self_func(int ch, lwprintf_t* p) {
-    uint8_t c = (uint8_t)ch;
-
-    /* Don't print zero */
-    if (c == '\0') {
-        HAL_UART_Transmit(&huart1, uart_buffer.buffer, uart_buffer.size, 100);
-        uart_buffer.size = 0;
-        return ch;
-    }
-    if(uart_buffer.size >= (OUTPUT_BUFFER_SIZE - 1)) {
-        uart_buffer.buffer[uart_buffer.size++] = ch;
-        HAL_UART_Transmit(&huart1, uart_buffer.buffer, uart_buffer.size, 100);
-        uart_buffer.size = 0;
-    } else {
-      uart_buffer.buffer[uart_buffer.size++] = ch;
-    }
-    
-    return ch;
-}
-
 void usart_rx_check(size_t pos) {
     static size_t old_pos;
 
@@ -201,27 +181,28 @@ uint8_t read_button_gpio(uint8_t button_id) {
 
 void btn1_single_click_handler(Button* btn) {
 	(void)btn;
-	lwprintf("Button 1: Single Click\r\n");
+	logger_info("Button 1: Single Click");
 }
 
 void btn1_double_click_handler(Button* btn) {
   (void)btn;
-	lwprintf("Button 1: Double Click\r\n");
+  logger_info("Button 1: Double Click");
 	HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
 }
 
 void btn1_long_press_start_handler(Button* btn) {
   (void)btn;
-  lwprintf("Button 1: Long Press Start\r\n");
+  logger_info("Button 1: Long Press Start");
 }
 
 void btn1_long_press_hold_handler(Button* btn) {
   (void)btn;
-  lwprintf("Button 1: Long Press Hold...\r\n");
+  logger_info("Button 1: Long Press Hold...");
 }
 
 void btn1_press_repeat_handler(Button* btn) {
-  lwprintf("Button 1: Press Repeat (count: %d)\n", button_get_repeat_count(btn));
+  (void)btn;
+  logger_info("Button 1: Press Repeat (count: %d)", button_get_repeat_count(btn));
 }
 
 void button_init_process(void) {
@@ -247,18 +228,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 #endif
 
-void print_hex(uint8_t* in, uint32_t in_len) {
-	uint32_t i;
-	for(i=0; i<in_len; i++) {
-		lwprintf("%02x", in[i]);
-		if((i+1)%16 == 0) {
-			lwprintf("\r\n");
-		}
-	}
-	if(i%16 != 0) {
-		lwprintf("\r\n");
-	}
-}
 /* USER CODE END 0 */
 
 /**
@@ -296,7 +265,7 @@ int main(void)
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
-  lwprintf_init(lwprintf_self_func);
+  logger_init();
   lwrb_init(&usart_tx_rb, usart_tx_rb_data, sizeof(usart_tx_rb_data));
 
   /* USER CODE END 2 */
@@ -307,7 +276,7 @@ int main(void)
   //HAL_UART_Receive_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
 
-	lwprintf("System Start!!\r\n");
+	logger_info("System Start!!!");
 	
 	//button_init_process();
 	//HAL_TIM_Base_Start_IT(&htim7);
@@ -334,7 +303,7 @@ int main(void)
 		print_hex(out_data, sizeof(out_data));
 		
 	} else {
-		lwprintf("EE24_Init failed..\r\n");
+		logger_error("EE24_Init failed..");
 	}
 #endif
 	
@@ -343,17 +312,17 @@ int main(void)
 		for(int i=0; i<256; i++) {
 			spi_write[i] = i;
 		}
-		lwprintf("spi_write:\r\n");
-		print_hex(spi_write, sizeof(spi_write));
+		logger_info("spi_write:");
+		logger_hex(spi_write, sizeof(spi_write));
 		
 		SPIF_EraseSector(&spif, 0);
 		SPIF_WritePage(&spif, 0, spi_write, sizeof(spi_write), 0);
 		SPIF_ReadPage(&spif, 0, spi_read, sizeof(spi_read), 0);
-		lwprintf("spi_read:\r\n");
-		print_hex(spi_read, sizeof(spi_read));
+		logger_info("spi_read:");
+		logger_hex(spi_read, sizeof(spi_read));
 
 	} else {
-		lwprintf("SPIF_Init failed..\r\n");
+		logger_error("SPIF_Init failed..");
 	}
 #endif
 	

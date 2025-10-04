@@ -10,8 +10,8 @@
 #else
 //#include <stdio.h>
 //#define dprintf(...) printf(__VA_ARGS__)
-#include "lwprintf/lwprintf.h"
-#define dprintf(...) lwprintf(__VA_ARGS__)
+#include "logger.h"
+#define dprintf(...) logger_debug(__VA_ARGS__)
 
 #endif
 
