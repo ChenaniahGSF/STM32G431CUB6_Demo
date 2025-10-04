@@ -1,0 +1,5 @@
+../OSEK/src/OsTask.c:36:14:OS_GetTaskID	1
+../OSEK/src/OsTask.c:52:14:OS_GetTaskState	3
+../OSEK/src/OsTask.c:80:14:OS_ActivateTask	6
+../OSEK/src/OsTask.c:128:14:OS_TerminateTask	4
+../OSEK/src/OsTask.c:163:14:OS_ChainTask	6

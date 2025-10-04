@@ -1,0 +1,6 @@
+../OSEK/src/OsEvt.c:36:14:OS_GetResource	4
+../OSEK/src/OsEvt.c:76:14:OS_ReleaseResource	5
+../OSEK/src/OsEvt.c:129:14:OS_SetEvent	8
+../OSEK/src/OsEvt.c:184:14:OS_ClearEvent	3
+../OSEK/src/OsEvt.c:213:14:OS_GetEvent	4
+../OSEK/src/OsEvt.c:244:14:OS_WaitEvent	6

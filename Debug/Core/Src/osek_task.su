@@ -1,0 +1,2 @@
+../Core/Src/osek_task.c:11:1:TaskT1Func	16	static
+../Core/Src/osek_task.c:39:1:TaskIdleFunc	16	static

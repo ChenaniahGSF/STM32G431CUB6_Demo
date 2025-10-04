@@ -1,0 +1,5 @@
+../OSEK/src/OsAlarm.c:36:14:OS_GetAlarmBase	16	static
+../OSEK/src/OsAlarm.c:62:14:OS_GetAlarm	16	static
+../OSEK/src/OsAlarm.c:89:14:OS_SetRelAlarm	24	static
+../OSEK/src/OsAlarm.c:143:14:OS_SetAbsAlarm	24	static
+../OSEK/src/OsAlarm.c:193:14:OS_CancelAlarm	16	static

@@ -1,0 +1,6 @@
+../Third_Party/ee24/src/ee24.c:44:6:EE24_Delay	16	static
+../Third_Party/ee24/src/ee24.c:63:6:EE24_Lock	16	static
+../Third_Party/ee24/src/ee24.c:74:6:EE24_UnLock	16	static
+../Third_Party/ee24/src/ee24.c:94:6:EE24_Init	32	static
+../Third_Party/ee24/src/ee24.c:166:6:EE24_Read	56	static
+../Third_Party/ee24/src/ee24.c:207:6:EE24_Write	48	static

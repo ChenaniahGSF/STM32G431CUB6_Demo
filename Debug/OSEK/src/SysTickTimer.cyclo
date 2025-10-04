@@ -1,0 +1,2 @@
+../OSEK/src/SysTickTimer.c:28:6:SysTickTimer_Init	1
+../OSEK/src/SysTickTimer.c:37:6:SysTickTimer_Start	1

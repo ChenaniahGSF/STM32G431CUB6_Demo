@@ -1,0 +1,4 @@
+../OSEK/src/OsAsm.c:38:45:PendSV_Handler	1
+../OSEK/src/OsAsm.c:83:45:OsGetCurrentSP	1
+../OSEK/src/OsAsm.c:112:45:OsGetPSR	1
+../OSEK/src/OsAsm.c:144:45:SysTick_Handler	1

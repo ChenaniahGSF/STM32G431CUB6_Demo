@@ -1,0 +1,5 @@
+../OSEK/src/OsTask.c:36:14:OS_GetTaskID	16	static
+../OSEK/src/OsTask.c:52:14:OS_GetTaskState	16	static
+../OSEK/src/OsTask.c:80:14:OS_ActivateTask	16	static
+../OSEK/src/OsTask.c:128:14:OS_TerminateTask	8	static
+../OSEK/src/OsTask.c:163:14:OS_ChainTask	16	static

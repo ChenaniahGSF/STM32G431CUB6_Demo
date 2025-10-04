@@ -1,0 +1,5 @@
+../OSEK/src/OsAlarm.c:36:14:OS_GetAlarmBase	2
+../OSEK/src/OsAlarm.c:62:14:OS_GetAlarm	2
+../OSEK/src/OsAlarm.c:89:14:OS_SetRelAlarm	9
+../OSEK/src/OsAlarm.c:143:14:OS_SetAbsAlarm	9
+../OSEK/src/OsAlarm.c:193:14:OS_CancelAlarm	2
