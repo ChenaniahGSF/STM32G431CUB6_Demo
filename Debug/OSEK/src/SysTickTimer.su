@@ -1,2 +1,0 @@
-../OSEK/src/SysTickTimer.c:28:6:SysTickTimer_Init	4	static
-../OSEK/src/SysTickTimer.c:37:6:SysTickTimer_Start	4	static

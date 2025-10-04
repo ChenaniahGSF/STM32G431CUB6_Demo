@@ -171,6 +171,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 //uart HT TC IDLE event will trigger this callback, dma mode enable
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if(huart == &huart1) {
+#if 0
     usart_rx_check(Size);
 
     if (usart_tx_dma_current_len == 0 && (usart_tx_dma_current_len = lwrb_get_linear_block_read_length(&usart_tx_rb)) > 0) {
@@ -179,6 +180,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
       lwrb_skip(&usart_tx_rb, usart_tx_dma_current_len);
       usart_tx_dma_current_len = 0;
     }
+#endif
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
   }
 }

@@ -19,6 +19,7 @@
 //
 // *****************************************************************************
 #include"SysTickTimer.h"
+#include "stm32g4xx_hal.h"
 
 
 
@@ -31,7 +32,8 @@ void SysTickTimer_Init(void)
 	STK_LOAD = SYS_TICK_1MS;
 	STK_VAL  = 0;
 	StkCtrl->ClockSrc = SYS_TICK_CLKSRC_AHB;
-	StkCtrl->TickInt = SYS_TICK_ENABLE_INT;	
+	StkCtrl->TickInt = SYS_TICK_ENABLE_INT;
+	HAL_NVIC_SetPriority(SysTick_IRQn, 5, 0);
 }
 
 void SysTickTimer_Start(void)

@@ -1,3 +1,0 @@
-../Third_Party/lwshell/src/lwshell/lwshell_user.c:11:13:lwshell_user_output	16	static
-../Third_Party/lwshell/src/lwshell/lwshell_user.c:17:16:hello_cmd	24	static
-../Third_Party/lwshell/src/lwshell/lwshell_user.c:27:6:lwshell_user_init	8	static
