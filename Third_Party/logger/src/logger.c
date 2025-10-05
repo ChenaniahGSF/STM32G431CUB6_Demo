@@ -6,7 +6,18 @@
  */
 #include "logger.h"
 
+#ifdef LOG_ENABLE
+
 #ifdef LWPRINTF_ENABLE
+
+#define UART_TX_BUFFER_SIZE (64)
+
+struct uart_tx_buffer {
+    uint8_t buffer[UART_TX_BUFFER_SIZE];
+    int size;
+};
+struct uart_tx_buffer uart_buffer;
+
 int lwprintf_self_func(int ch, lwprintf_t* p) {
     uint8_t c = (uint8_t)ch;
 
@@ -16,7 +27,7 @@ int lwprintf_self_func(int ch, lwprintf_t* p) {
         uart_buffer.size = 0;
         return ch;
     }
-    if(uart_buffer.size >= (OUTPUT_BUFFER_SIZE - 1)) {
+    if(uart_buffer.size >= (UART_TX_BUFFER_SIZE - 1)) {
         uart_buffer.buffer[uart_buffer.size++] = ch;
         HAL_UART_Transmit(&huart1, uart_buffer.buffer, uart_buffer.size, 100);
         uart_buffer.size = 0;
@@ -69,5 +80,15 @@ void logger_hex(uint8_t* in, size_t ilen) {
 }
 #endif
 
+#else
+void logger_init(void) {
+  //do nothing
+};
 
+void logger_hex(uint8_t* in, size_t ilen) {
+  (void)in;
+  (void)ilen;
+  //do nothing
+}
+#endif
 

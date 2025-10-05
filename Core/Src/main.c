@@ -21,6 +21,7 @@
 #include "dma.h"
 #include "i2c.h"
 #include "spi.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -30,12 +31,17 @@
 #include "lwrb/lwrb.h"
 #include "ee24.h"
 #include "spif.h"
-#include "multi_button.h"
+#include "multi_button_user.h"
 #include "lwshell/lwshell.h"
 #include "lwshell/lwshell_user.h"
+
+//#define OSEK_ENABLE
+
+#ifdef OSEK_ENABLE
 #include "OsAPIs.h"
 #include "SysTickTimer.h"
 #include "TCB.h"
+#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,18 +56,12 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define OUTPUT_BUFFER_SIZE (64)
 #define ARRAY_LEN(x)            (sizeof(x) / sizeof((x)[0]))
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-struct output_buffer {
-    uint8_t buffer[OUTPUT_BUFFER_SIZE];
-    int size;
-};
-struct output_buffer uart_buffer;
 uint8_t uart_rx_buf[1];
 
 EE24_HandleTypeDef ee24;
@@ -72,8 +72,6 @@ uint8_t out_data[4];
 uint8_t spi_read[256];
 uint8_t spi_write[256];
 SPIF_HandleTypeDef spif;
-
-static Button btn1;
 
 lwrb_t usart_tx_rb;
 uint8_t usart_tx_rb_data[128];
@@ -150,6 +148,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 #endif
 
 //uart HT TC IDLE event will trigger this callback, dma mode enable
+#ifdef OSEK_ENABLE
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   __disable_irq();
   if(huart == &huart1) {
@@ -157,73 +156,23 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 
     if (usart_tx_dma_current_len == 0 && (usart_tx_dma_current_len = lwrb_get_linear_block_read_length(&usart_tx_rb)) > 0) {
       //OS_SetEvent(TASK_5MS, EVT_TRIGGER_5MS_TASK);
-      //lwshell_input(lwrb_get_linear_block_read_address(&usart_tx_rb), usart_tx_dma_current_len);
-
-      //lwrb_skip(&usart_tx_rb, usart_tx_dma_current_len);
-      //usart_tx_dma_current_len = 0;
     }
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
   }
   __enable_irq();
 }
+#else
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
+  if(huart == &huart1) {
+    usart_rx_check(Size);
 
-uint8_t read_button_gpio(uint8_t button_id) {
-	uint8_t result;
-	switch (button_id) {
-		case 1:
-			result = HAL_GPIO_ReadPin(USER_BUTTON_GPIO_Port, USER_BUTTON_Pin);
-			break;
-		default:
-			return 0;
-	}
-	return result;
-}
+    if (usart_tx_dma_current_len == 0 && (usart_tx_dma_current_len = lwrb_get_linear_block_read_length(&usart_tx_rb)) > 0) {
+      lwshell_input(lwrb_get_linear_block_read_address(&usart_tx_rb), usart_tx_dma_current_len);
 
-void btn1_single_click_handler(Button* btn) {
-	(void)btn;
-	logger_info("Button 1: Single Click");
-}
-
-void btn1_double_click_handler(Button* btn) {
-  (void)btn;
-  logger_info("Button 1: Double Click");
-	HAL_GPIO_TogglePin(USER_LED_GPIO_Port, USER_LED_Pin);
-}
-
-void btn1_long_press_start_handler(Button* btn) {
-  (void)btn;
-  logger_info("Button 1: Long Press Start");
-}
-
-void btn1_long_press_hold_handler(Button* btn) {
-  (void)btn;
-  logger_info("Button 1: Long Press Hold...");
-}
-
-void btn1_press_repeat_handler(Button* btn) {
-  (void)btn;
-  logger_info("Button 1: Press Repeat (count: %d)", button_get_repeat_count(btn));
-}
-
-void button_init_process(void) {
-	// Initialize button 1 (active high for simulation)
-    button_init(&btn1, read_button_gpio, 1, 1);
-    
-	// Attach event handlers for button 1
-    button_attach(&btn1, BTN_SINGLE_CLICK, btn1_single_click_handler);
-    button_attach(&btn1, BTN_DOUBLE_CLICK, btn1_double_click_handler);
-    button_attach(&btn1, BTN_LONG_PRESS_START, btn1_long_press_start_handler);
-    //button_attach(&btn1, BTN_LONG_PRESS_HOLD, btn1_long_press_hold_handler);
-    //button_attach(&btn1, BTN_PRESS_REPEAT, btn1_press_repeat_handler);
-	
-	button_start(&btn1);
-}
-
-#if 0
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if(htim == &htim7) {
-    button_ticks();
+      lwrb_skip(&usart_tx_rb, usart_tx_dma_current_len);
+      usart_tx_dma_current_len = 0;
+    }
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
   }
 }
 #endif
@@ -263,6 +212,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
   logger_init();
@@ -277,9 +227,11 @@ int main(void)
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
 
 	logger_info("System Start!!!");
-	
-	//button_init_process();
-	//HAL_TIM_Base_Start_IT(&htim7);
+
+#ifndef OSEK_ENABLE
+	buttons_init();
+	HAL_TIM_Base_Start_IT(&htim7);
+#endif
 
 	lwshell_user_init();
 
@@ -325,8 +277,10 @@ int main(void)
 		logger_error("SPIF_Init failed..");
 	}
 #endif
-	
+
+#ifdef OSEK_ENABLE
 	OS_StartOS(APP_MODE_DEFAULT);
+#endif
 
   while (1)
   {
@@ -406,10 +360,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  //if(htim == &htim7) {
-  //  button_ticks();
-  //}
-
+  if(htim->Instance == TIM7) {
+    button_ticks();
+  }
   /* USER CODE END Callback 1 */
 }
 

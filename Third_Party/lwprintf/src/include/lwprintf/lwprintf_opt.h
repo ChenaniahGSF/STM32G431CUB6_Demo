@@ -120,7 +120,7 @@ extern "C" {
  *
  */
 #ifndef LWPRINTF_CFG_SUPPORT_TYPE_FLOAT
-#define LWPRINTF_CFG_SUPPORT_TYPE_FLOAT 0
+#define LWPRINTF_CFG_SUPPORT_TYPE_FLOAT 1
 #endif
 
 /**
