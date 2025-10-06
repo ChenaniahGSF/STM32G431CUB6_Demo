@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "dma.h"
+#include "fdcan.h"
 #include "i2c.h"
 #include "spi.h"
 #include "tim.h"
@@ -78,6 +79,8 @@ uint8_t usart_tx_rb_data[128];
 
 volatile size_t usart_tx_dma_current_len = 0;
 uint8_t usart_rx_dma_buffer[64];
+
+uint8_t can_tx_data[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
 
 /* USER CODE END PV */
 
@@ -142,8 +145,10 @@ void usart_rx_check(size_t pos) {
 //uart interrupt mode, without dma
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  lwshell_input(uart_rx_buf, 1);
-  HAL_UART_Receive_IT(&huart1, uart_rx_buf, 1);
+  if (huart == &huart1) {
+    lwshell_input(uart_rx_buf, 1);
+    HAL_UART_Receive_IT(&huart1, uart_rx_buf, 1);
+  }
 }
 #endif
 
@@ -163,7 +168,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 }
 #else
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-  if(huart == &huart1) {
+  if (huart == &huart1) {
     usart_rx_check(Size);
 
     if (usart_tx_dma_current_len == 0 && (usart_tx_dma_current_len = lwrb_get_linear_block_read_length(&usart_tx_rb)) > 0) {
@@ -213,6 +218,7 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI1_Init();
   MX_TIM7_Init();
+  MX_FDCAN1_Init();
   /* USER CODE BEGIN 2 */
 
   logger_init();
@@ -224,16 +230,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   //HAL_UART_Receive_IT(&huart1, uart_rx_buf, sizeof(uart_rx_buf));
   //HAL_UART_Receive_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
 
-	logger_info("System Start!!!");
-
+  logger_info("System Start!!!");
+	
 #ifndef OSEK_ENABLE
-	buttons_init();
-	HAL_TIM_Base_Start_IT(&htim7);
+  buttons_init();
+  HAL_TIM_Base_Start_IT(&htim7);
 #endif
 
-	lwshell_user_init();
+  lwshell_user_init();
 
 #if 0
 	if(EE24_Init(&ee24, &hi2c1, EE24_ADDRESS_DEFAULT)){
@@ -287,7 +293,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    // will never reach here
+#if 0
+    if(FDCAN1_Send_Msg(can_tx_data) != 0) {
+      logger_error("can send failed");
+    }
+    HAL_Delay(2000);
+#endif
   }
   /* USER CODE END 3 */
 }
@@ -360,7 +371,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if(htim->Instance == TIM7) {
+  if (htim->Instance == TIM7) {
     button_ticks();
   }
   /* USER CODE END Callback 1 */
