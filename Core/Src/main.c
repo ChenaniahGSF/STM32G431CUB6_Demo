@@ -35,6 +35,7 @@
 #include "multi_button_user.h"
 #include "lwshell/lwshell.h"
 #include "lwshell/lwshell_user.h"
+#include "ssd1306_tests.h"
 
 //#define OSEK_ENABLE
 
@@ -217,6 +218,7 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM7_Init();
   MX_RNG_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
 
   logger_init();
@@ -285,8 +287,10 @@ int main(void)
 #ifdef OSEK_ENABLE
 	OS_StartOS(APP_MODE_DEFAULT);
 #endif
-	RNG_Init();
-	RNG_Enable_IRQ();
+
+	//RNG_Init();
+	//RNG_Enable_IRQ();
+	ssd1306_TestAll();
   while (1)
   {
     /* USER CODE END WHILE */
@@ -319,8 +323,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV3;
-  RCC_OscInitStruct.PLL.PLLN = 108;
+  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
+  RCC_OscInitStruct.PLL.PLLN = 36;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV6;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
