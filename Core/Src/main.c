@@ -35,7 +35,8 @@
 #include "multi_button_user.h"
 #include "lwshell/lwshell.h"
 #include "lwshell/lwshell_user.h"
-#include "ssd1306_tests.h"
+#include "lwutil/lwutil.h"
+//#include "ssd1306_tests.h"
 
 //#define OSEK_ENABLE
 
@@ -58,7 +59,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define ARRAY_LEN(x)            (sizeof(x) / sizeof((x)[0]))
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -133,7 +134,7 @@ void usart_rx_check(size_t pos) {
              * [   7   ]            |                                 |
              * [ N - 1 ]            |---------------------------------|
              */
-            lwrb_write(&usart_tx_rb, &usart_rx_dma_buffer[old_pos], ARRAY_LEN(usart_rx_dma_buffer) - old_pos);
+            lwrb_write(&usart_tx_rb, &usart_rx_dma_buffer[old_pos], LWUTIL_ARRAYSIZE(usart_rx_dma_buffer) - old_pos);
             if (pos > 0) {
                 lwrb_write(&usart_tx_rb, &usart_rx_dma_buffer[0], pos);
             }
@@ -290,7 +291,7 @@ int main(void)
 
 	//RNG_Init();
 	//RNG_Enable_IRQ();
-	ssd1306_TestAll();
+	//ssd1306_TestAll();
   while (1)
   {
     /* USER CODE END WHILE */
