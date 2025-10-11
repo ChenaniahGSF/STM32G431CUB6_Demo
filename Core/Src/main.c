@@ -80,6 +80,7 @@ uint8_t usart_tx_rb_data[128];
 volatile size_t usart_tx_dma_current_len = 0;
 uint8_t usart_rx_dma_buffer[64];
 
+uint32_t can_id = 0x113;
 uint8_t can_tx_data[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
 
 /* USER CODE END PV */
@@ -293,12 +294,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-#if 0
-    if(FDCAN1_Send_Msg(can_tx_data) != 0) {
+    if(FDCAN1_Send_Msg(can_id, can_tx_data, sizeof(can_tx_data)) != 0) {
       logger_error("can send failed");
     }
-    HAL_Delay(2000);
-#endif
+    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }

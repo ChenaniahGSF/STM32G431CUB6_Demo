@@ -21,10 +21,11 @@
 #include "fdcan.h"
 
 /* USER CODE BEGIN 0 */
-#if 0
+#include "logger.h"
+
 FDCAN_RxHeaderTypeDef fdcan1_RxHeader;
 FDCAN_TxHeaderTypeDef fdcan1_TxHeader;
-#endif
+uint8_t can_rx_buf[8];
 /* USER CODE END 0 */
 
 FDCAN_HandleTypeDef hfdcan1;
@@ -63,7 +64,6 @@ void MX_FDCAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN1_Init 2 */
-#if 0
   FDCAN_FilterTypeDef FDCAN1_RXFilter;
   FDCAN1_RXFilter.IdType=FDCAN_STANDARD_ID;
   FDCAN1_RXFilter.FilterIndex=0;
@@ -78,7 +78,6 @@ void MX_FDCAN1_Init(void)
 
   HAL_FDCAN_Start(&hfdcan1);
   HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE,0);
-#endif
 }
 
 void HAL_FDCAN_MspInit(FDCAN_HandleTypeDef* fdcanHandle)
@@ -151,35 +150,32 @@ void HAL_FDCAN_MspDeInit(FDCAN_HandleTypeDef* fdcanHandle)
 }
 
 /* USER CODE BEGIN 1 */
-#if 0
-uint8_t FDCAN1_Send_Msg(uint8_t* msg)
+uint8_t FDCAN1_Send_Msg(uint32_t id, uint8_t* msg, uint32_t mlen)
 {
-  fdcan1_TxHeader.Identifier = 0x001;
+  fdcan1_TxHeader.Identifier = id;
   fdcan1_TxHeader.IdType = FDCAN_STANDARD_ID;
   fdcan1_TxHeader.TxFrameType = FDCAN_DATA_FRAME;
-  fdcan1_TxHeader.DataLength = FDCAN_DLC_BYTES_8;
+  fdcan1_TxHeader.DataLength = mlen;
   fdcan1_TxHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
   fdcan1_TxHeader.BitRateSwitch = FDCAN_BRS_OFF;
   fdcan1_TxHeader.FDFormat = FDCAN_CLASSIC_CAN;
   fdcan1_TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
   fdcan1_TxHeader.MessageMarker = 0x52;
 
-  if(HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1,&fdcan1_TxHeader,msg) != HAL_OK) {
+  if(HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1, &fdcan1_TxHeader, msg) != HAL_OK) {
     return 1;
   }
   return 0;
 }
 
-uint8_t FDCAN1_Receive_Msg(uint8_t *buf, uint16_t *Identifier,uint16_t *len)
-{
-
-  if(HAL_FDCAN_GetRxMessage(&hfdcan1,FDCAN_RX_FIFO0,&fdcan1_RxHeader,buf)!=HAL_OK) {
-    return 0;
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs) {
+  if (hfdcan->Instance == FDCAN1) {
+    if(RxFifo0ITs == FDCAN_IT_RX_FIFO0_NEW_MESSAGE) {
+      if(HAL_FDCAN_GetRxMessage(hfdcan, FDCAN_RX_FIFO0, &fdcan1_RxHeader, can_rx_buf) == HAL_OK) {
+        logger_hex(can_rx_buf, sizeof(can_rx_buf));
+      }
+    }
   }
-  *Identifier = fdcan1_RxHeader.Identifier;
-  *len=fdcan1_RxHeader.DataLength>>16;
-  return fdcan1_RxHeader.DataLength>>16;
 }
-#endif
 
 /* USER CODE END 1 */
