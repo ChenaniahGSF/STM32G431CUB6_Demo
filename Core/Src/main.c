@@ -36,6 +36,7 @@
 #include "lwshell/lwshell.h"
 #include "lwshell/lwshell_user.h"
 #include "lwutil/lwutil.h"
+#include "smarttimer_user.h"
 //#include "ssd1306_tests.h"
 
 //#define OSEK_ENABLE
@@ -192,7 +193,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  stim_init();
+  set_timetick();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -292,6 +294,9 @@ int main(void)
 	//RNG_Init();
 	//RNG_Enable_IRQ();
 	//ssd1306_TestAll();
+
+  stim_runlater(10000,runlater_test);
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -300,6 +305,7 @@ int main(void)
     //HAL_Delay(5000);
     //RNG_Get_Random(random_buffer, sizeof(random_buffer));
     //logger_hex(random_buffer, sizeof(random_buffer));
+    stim_mainloop();
   }
   /* USER CODE END 3 */
 }
@@ -369,6 +375,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim->Instance == TIM17)
   {
     HAL_IncTick();
+    stim_tick();
   }
   /* USER CODE BEGIN Callback 1 */
   if(htim->Instance == TIM7) {
