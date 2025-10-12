@@ -19,6 +19,6 @@ struct date{
 };
 
 void set_timetick (void);
-void runlater_test(void);
+void print_data_time(void);
 
 #endif /* SMARTTIMER_SMARTTIMER_USER_H_ */

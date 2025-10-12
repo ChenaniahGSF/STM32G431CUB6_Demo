@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "smarttimer_user.h"
 #include "logger.h"
+#include "rtc.h"
 
 struct date m_date;
 const char datestr[] = "2025:10:12#13:02:00";
@@ -63,7 +64,6 @@ static void changeday ( void )
 
 static void simulation_rtc(void)
 {
-
   if(++m_date.second == 60){
     m_date.second = 0;
     if(++m_date.minute == 60){
@@ -87,15 +87,18 @@ void set_timetick (void)
     m_date.minute = atoi(datestr + 14);
     m_date.second = atoi(datestr + 17);
 
-    stim_loop(1000,simulation_rtc,STIM_LOOP_FOREVER);
+    stim_loop(1000, simulation_rtc, STIM_LOOP_FOREVER);
 }
 
+void print_data_time(void) {
+  RTC_TimeTypeDef sTime;
+  RTC_DateTypeDef sDate;
 
-void runlater_test(void)
-{
-  logger_info("after runlater===>[%02d:%02d:%02d]",m_date.hour,m_date.minute,m_date.second);
-  logger_info("before delay===>[%02d:%02d:%02d]",m_date.hour,m_date.minute,m_date.second);
-  stim_delay(5000);
-  logger_info("after delay===>[%02d:%02d:%02d]",m_date.hour,m_date.minute,m_date.second);
+  HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+  HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+
+  logger_info("Date: 20%02d-%02d-%02d Weekday: %d",
+         sDate.Year, sDate.Month, sDate.Date, sDate.WeekDay);
+  logger_info("Time: %02d:%02d:%02d",
+         sTime.Hours, sTime.Minutes, sTime.Seconds);
 }
-

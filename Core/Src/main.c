@@ -21,6 +21,7 @@
 #include "dma.h"
 #include "i2c.h"
 #include "rng.h"
+#include "rtc.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -194,7 +195,7 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
   stim_init();
-  set_timetick();
+  //set_timetick();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -222,6 +223,7 @@ int main(void)
   MX_TIM7_Init();
   MX_RNG_Init();
   MX_I2C2_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
   logger_init();
@@ -294,9 +296,8 @@ int main(void)
 	//RNG_Init();
 	//RNG_Enable_IRQ();
 	//ssd1306_TestAll();
-
-  stim_runlater(10000,runlater_test);
-
+	stim_loop(1000, print_data_time, STIM_LOOP_FOREVER);
+	//stim_runlater(5000, print_data_time);
   while (1)
   {
     /* USER CODE END WHILE */
@@ -323,11 +324,17 @@ void SystemClock_Config(void)
   */
   HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 
+  /** Configure LSE Drive Capability
+  */
+  HAL_PWR_EnableBkUpAccess();
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
+
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
@@ -370,12 +377,14 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
-
+  if (htim->Instance == TIM17)
+  {
+    stim_tick();
+  }
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM17)
   {
     HAL_IncTick();
-    stim_tick();
   }
   /* USER CODE BEGIN Callback 1 */
   if(htim->Instance == TIM7) {
