@@ -6,13 +6,13 @@
  */
 #include "lwshell/lwshell.h"
 #include "lwprintf/lwprintf.h"
-#include "usart.h"
+#include "logger.h"
 #include "rtc.h"
 
 void lwshell_user_output(const char* str, struct lwshell* lwobj) {
   (void)lwobj;
-  //lwprintf("%s", str);
-  HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
+  //HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
+  logger_printf("%s", str);
 }
 
 static int32_t hello_cmd(int32_t argc, char** argv) {
@@ -25,6 +25,7 @@ static int32_t hello_cmd(int32_t argc, char** argv) {
   return 0;
 }
 
+#if 0
 static int get_hal_rtc_weekday(int year, int month, int day) {
     int q, m, K, J, h;
 
@@ -55,6 +56,7 @@ static int get_hal_rtc_weekday(int year, int month, int day) {
         default: return -1; // 错误
     }
 }
+#endif
 
 static int32_t set_time_cmd(int32_t argc, char** argv) {
   RTC_TimeTypeDef sTime;
@@ -65,7 +67,7 @@ static int32_t set_time_cmd(int32_t argc, char** argv) {
     HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
 
-    printf("Date: 20%02d-%02d-%02d %02d:%02d:%02d %s\r\n",
+    logger_printf("Date: 20%02d-%02d-%02d %02d:%02d:%02d %s\r\n",
              sDate.Year,
              sDate.Month,
              sDate.Date,
