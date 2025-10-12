@@ -296,7 +296,7 @@ int main(void)
 	//RNG_Init();
 	//RNG_Enable_IRQ();
 	//ssd1306_TestAll();
-	stim_loop(1000, print_data_time, STIM_LOOP_FOREVER);
+	//stim_loop(1000, print_data_time, STIM_LOOP_FOREVER);
 	//stim_runlater(5000, print_data_time);
   while (1)
   {
