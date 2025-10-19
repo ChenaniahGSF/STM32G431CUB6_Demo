@@ -104,15 +104,12 @@ void HAL_RNG_MspDeInit(RNG_HandleTypeDef* rngHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void RNG_Init(void) {
+void random_init(void) {
   lwrb_init(&lwrb_rng, rng_buffer, sizeof(rng_buffer));
-}
-
-void RNG_Enable_IRQ(void) {
   HAL_RNG_GenerateRandomNumber_IT(&hrng);
 }
 
-void RNG_Get_Random(uint8_t* out, size_t osize) {
+void random_get(uint8_t* out, size_t osize) {
   lwrb_sz_t read_size;
   size_t remain_size, copy_size;
   uint32_t temp;
@@ -155,7 +152,7 @@ void HAL_RNG_ReadyDataCallback(RNG_HandleTypeDef *hrng, uint32_t random32bit) {
     free = lwrb_get_free(&lwrb_rng);
     if(free >= 4) {
       lwrb_write(&lwrb_rng, temp, 4);
-      RNG_Enable_IRQ();
+      HAL_RNG_GenerateRandomNumber_IT(hrng);
     } else {
       for(i=0; i<free; i++) {
         lwrb_write(&lwrb_rng, &temp[i], 1);

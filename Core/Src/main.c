@@ -30,13 +30,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "logger.h"
-#include "lwrb/lwrb.h"
-#include "ee24.h"
-#include "spif.h"
 #include "multi_button_user.h"
-#include "lwshell/lwshell.h"
 #include "lwshell/lwshell_user.h"
-#include "lwutil/lwutil.h"
 #include "smarttimer_user.h"
 //#include "ssd1306_tests.h"
 
@@ -60,24 +55,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint8_t uart_rx_buf[1];
-
-EE24_HandleTypeDef ee24;
-uint8_t erase_data[4] = {0xff, 0xff, 0xff, 0xff};
-uint8_t in_data1[4] = {0x3, 0x3, 0x3, 0x3};
-uint8_t in_data2[4] = {0xc, 0xc, 0xc, 0xc};
-uint8_t out_data[4];
-uint8_t spi_read[256];
-uint8_t spi_write[256];
-SPIF_HandleTypeDef spif;
-
-lwrb_t usart_tx_rb;
-uint8_t usart_tx_rb_data[128];
-
-volatile size_t usart_tx_dma_current_len = 0;
-uint8_t usart_rx_dma_buffer[64];
-
-uint8_t random_buffer[37];
 
 /* USER CODE END PV */
 
@@ -89,78 +66,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void usart_rx_check(size_t pos) {
-    static size_t old_pos;
-
-    /* Calculate current position in buffer and check for new data available */
-    if (pos != old_pos) {                       /* Check change in received data */
-        if (pos > old_pos) {                    /* Current position is over previous one */
-            /*
-             * Processing is done in "linear" mode.
-             *
-             * Application processing is fast with single data block,
-             * length is simply calculated by subtracting pointers
-             *
-             * [   0   ]
-             * [   1   ] <- old_pos |------------------------------------|
-             * [   2   ]            |                                    |
-             * [   3   ]            | Single block (len = pos - old_pos) |
-             * [   4   ]            |                                    |
-             * [   5   ]            |------------------------------------|
-             * [   6   ] <- pos
-             * [   7   ]
-             * [ N - 1 ]
-             */
-            lwrb_write(&usart_tx_rb, &usart_rx_dma_buffer[old_pos], pos - old_pos);
-        } else {
-            /*
-             * Processing is done in "overflow" mode..
-             *
-             * Application must process data twice,
-             * since there are 2 linear memory blocks to handle
-             *
-             * [   0   ]            |---------------------------------|
-             * [   1   ]            | Second block (len = pos)        |
-             * [   2   ]            |---------------------------------|
-             * [   3   ] <- pos
-             * [   4   ] <- old_pos |---------------------------------|
-             * [   5   ]            |                                 |
-             * [   6   ]            | First block (len = N - old_pos) |
-             * [   7   ]            |                                 |
-             * [ N - 1 ]            |---------------------------------|
-             */
-            lwrb_write(&usart_tx_rb, &usart_rx_dma_buffer[old_pos], LWUTIL_ARRAYSIZE(usart_rx_dma_buffer) - old_pos);
-            if (pos > 0) {
-                lwrb_write(&usart_tx_rb, &usart_rx_dma_buffer[0], pos);
-            }
-        }
-        old_pos = pos;                          /* Save current position as old for next transfers */
-    }
-}
-
-#if 0
-//uart interrupt mode, without dma
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-  lwshell_input(uart_rx_buf, 1);
-  HAL_UART_Receive_IT(&huart1, uart_rx_buf, 1);
-}
-#endif
-
-//uart HT TC IDLE event will trigger this callback, dma mode enable
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-  if(huart == &huart1) {
-    usart_rx_check(Size);
-
-    if (usart_tx_dma_current_len == 0 && (usart_tx_dma_current_len = lwrb_get_linear_block_read_length(&usart_tx_rb)) > 0) {
-      lwshell_input(lwrb_get_linear_block_read_address(&usart_tx_rb), usart_tx_dma_current_len);
-
-      lwrb_skip(&usart_tx_rb, usart_tx_dma_current_len);
-      usart_tx_dma_current_len = 0;
-    }
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
-  }
-}
 
 /* USER CODE END 0 */
 
@@ -204,69 +109,19 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
+  random_init();
   logger_init();
-  lwrb_init(&usart_tx_rb, usart_tx_rb_data, sizeof(usart_tx_rb_data));
+  uart_init();
 
+  logger_info("System Start!!!");
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //HAL_UART_Receive_IT(&huart1, uart_rx_buf, sizeof(uart_rx_buf));
-  //HAL_UART_Receive_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
-
-	logger_info("System Start!!!");
 
 	buttons_init();
-	HAL_TIM_Base_Start_IT(&htim7);
-
 	lwshell_user_init();
 
-#if 0
-	if(EE24_Init(&ee24, &hi2c1, EE24_ADDRESS_DEFAULT)){
-		EE24_Write(&ee24, 0x0, erase_data, sizeof(erase_data), 1000);
-		HAL_Delay(10);
-		
-		EE24_Write(&ee24, 0x0, in_data1, sizeof(in_data1), 1000);
-		HAL_Delay(10);
-		
-		EE24_Read(&ee24, 0x0, out_data, sizeof(out_data), 1000);
-		HAL_Delay(10);
-		print_hex(out_data, sizeof(out_data));
-		
-		EE24_Write(&ee24, 0x0, in_data2, sizeof(in_data2), 1000);
-		HAL_Delay(10);
-		
-		EE24_Read(&ee24, 0x0, out_data, sizeof(out_data), 1000);
-		HAL_Delay(10);
-		print_hex(out_data, sizeof(out_data));
-		
-	} else {
-		logger_error("EE24_Init failed..");
-	}
-#endif
-	
-#if 0
-	if(SPIF_Init(&spif, &hspi1, SPI1_CS_GPIO_Port, SPI1_CS_Pin)) {
-		for(int i=0; i<256; i++) {
-			spi_write[i] = i;
-		}
-		logger_info("spi_write:");
-		logger_hex(spi_write, sizeof(spi_write));
-		
-		SPIF_EraseSector(&spif, 0);
-		SPIF_WritePage(&spif, 0, spi_write, sizeof(spi_write), 0);
-		SPIF_ReadPage(&spif, 0, spi_read, sizeof(spi_read), 0);
-		logger_info("spi_read:");
-		logger_hex(spi_read, sizeof(spi_read));
-
-	} else {
-		logger_error("SPIF_Init failed..");
-	}
-#endif
-
-	//RNG_Init();
-	//RNG_Enable_IRQ();
 	//ssd1306_TestAll();
 	//stim_loop(1000, print_data_time, STIM_LOOP_FOREVER);
 	//stim_runlater(5000, print_data_time);
@@ -276,8 +131,6 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     //HAL_Delay(5000);
-    //RNG_Get_Random(random_buffer, sizeof(random_buffer));
-    //logger_hex(random_buffer, sizeof(random_buffer));
     stim_mainloop();
   }
   /* USER CODE END 3 */

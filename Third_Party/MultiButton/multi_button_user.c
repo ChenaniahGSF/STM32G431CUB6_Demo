@@ -6,7 +6,7 @@
  */
 #include "multi_button_user.h"
 #include "logger.h"
-#include "main.h"
+#include "tim.h"
 
 #define MAX_BUTTONS  (2)
 
@@ -115,4 +115,6 @@ void buttons_init(void)
     //setting special event callback
     button_detach(&buttons[0], BTN_LONG_PRESS_START);
     button_attach(&buttons[0], BTN_LONG_PRESS_START, on_config_button_click);
+
+    HAL_TIM_Base_Start_IT(&htim7);
 }

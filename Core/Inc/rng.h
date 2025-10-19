@@ -41,9 +41,8 @@ extern RNG_HandleTypeDef hrng;
 void MX_RNG_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-void RNG_Init(void);
-void RNG_Enable_IRQ(void);
-void RNG_Get_Random(uint8_t* out, size_t osize);
+void random_init(void);
+void random_get(uint8_t* out, size_t osize);
 
 /* USER CODE END Prototypes */
 
