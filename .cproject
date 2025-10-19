@@ -54,7 +54,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Third_Party/MultiButton}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Third_Party/ee24/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Third_Party/spif/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/OSEK/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Third_Party/logger/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Third_Party/i2c_oled/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Third_Party/lwutil/src/include}&quot;"/>
@@ -86,10 +85,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="MultiButton/examples/|lwprintf/src/system/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Third_Party"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="OSEK"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry excluding="MultiButton/examples/|lwprintf/src/system/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Third_Party"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

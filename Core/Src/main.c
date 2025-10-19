@@ -40,13 +40,6 @@
 #include "smarttimer_user.h"
 //#include "ssd1306_tests.h"
 
-//#define OSEK_ENABLE
-
-#ifdef OSEK_ENABLE
-#include "OsAPIs.h"
-#include "SysTickTimer.h"
-#include "TCB.h"
-#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -155,20 +148,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 #endif
 
 //uart HT TC IDLE event will trigger this callback, dma mode enable
-#ifdef OSEK_ENABLE
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-  __disable_irq();
-  if(huart == &huart1) {
-    usart_rx_check(Size);
-
-    if (usart_tx_dma_current_len == 0 && (usart_tx_dma_current_len = lwrb_get_linear_block_read_length(&usart_tx_rb)) > 0) {
-      //OS_SetEvent(TASK_5MS, EVT_TRIGGER_5MS_TASK);
-    }
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
-  }
-  __enable_irq();
-}
-#else
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   if(huart == &huart1) {
     usart_rx_check(Size);
@@ -182,7 +161,6 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, usart_rx_dma_buffer, sizeof(usart_rx_dma_buffer));
   }
 }
-#endif
 
 /* USER CODE END 0 */
 
@@ -239,10 +217,8 @@ int main(void)
 
 	logger_info("System Start!!!");
 
-#ifndef OSEK_ENABLE
 	buttons_init();
 	HAL_TIM_Base_Start_IT(&htim7);
-#endif
 
 	lwshell_user_init();
 
@@ -287,10 +263,6 @@ int main(void)
 	} else {
 		logger_error("SPIF_Init failed..");
 	}
-#endif
-
-#ifdef OSEK_ENABLE
-	OS_StartOS(APP_MODE_DEFAULT);
 #endif
 
 	//RNG_Init();
