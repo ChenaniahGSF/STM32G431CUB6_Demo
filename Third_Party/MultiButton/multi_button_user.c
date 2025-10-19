@@ -8,7 +8,7 @@
 #include "logger.h"
 #include "main.h"
 
-#define MAX_BUTTONS  (1)
+#define MAX_BUTTONS  (2)
 
 static int demo_mode = 1;
 static int verbose_mode = 0;
@@ -23,9 +23,9 @@ uint8_t read_button_gpio(uint8_t button_id) {
     case 1:
       result = HAL_GPIO_ReadPin(USER_BUTTON_GPIO_Port, USER_BUTTON_Pin);
       break;
-    //case 2:
-    //  result = HAL_GPIO_ReadPin(USER_BUTTON2_GPIO_Port, USER_BUTTON2_Pin);
-    //break;
+    case 2:
+      result = HAL_GPIO_ReadPin(EC11_KEY_GPIO_Port, EC11_KEY_Pin);
+    break;
     default:
       return 0;
   }
@@ -87,9 +87,9 @@ void on_long_press_hold(Button* btn) { generic_event_handler(btn, "Long Press Ho
 void on_press_repeat(Button* btn) { generic_event_handler(btn, "Press Repeat"); }
 
 // Initialize a single button with all event handlers
-void init_button(int index, uint8_t button_id, int enable_all_events)
+void init_button(int index, uint8_t button_id, uint8_t active_level, int enable_all_events)
 {
-    button_init(&buttons[index], read_button_gpio, 1, button_id);
+    button_init(&buttons[index], read_button_gpio, active_level, button_id);
     if (enable_all_events) {
         button_attach(&buttons[index], BTN_PRESS_DOWN, on_press_down);
         button_attach(&buttons[index], BTN_PRESS_UP, on_press_up);
@@ -110,9 +110,9 @@ void init_button(int index, uint8_t button_id, int enable_all_events)
 // Initialize all buttons
 void buttons_init(void)
 {
-    init_button(0, 1, 0);
-    //init_button(1, 2, 0);
-    // setting special event callback
+    init_button(0, 1, 1, 0);
+    init_button(1, 2, 0, 0);
+    //setting special event callback
     button_detach(&buttons[0], BTN_LONG_PRESS_START);
     button_attach(&buttons[0], BTN_LONG_PRESS_START, on_config_button_click);
 }

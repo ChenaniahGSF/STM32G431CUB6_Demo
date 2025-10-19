@@ -22,6 +22,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN 0 */
+#include "logger.h"
 
 /* USER CODE END 0 */
 
@@ -69,6 +70,18 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(SPI1_CS_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : EC11_A_Pin EC11_B_Pin */
+  GPIO_InitStruct.Pin = EC11_A_Pin|EC11_B_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : EC11_KEY_Pin */
+  GPIO_InitStruct.Pin = EC11_KEY_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(EC11_KEY_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : USER_LED_Pin */
   GPIO_InitStruct.Pin = USER_LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -76,8 +89,57 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(USER_LED_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
 }
 
 /* USER CODE BEGIN 2 */
+int optionIndex = 0;           // 菜单索引
+int timeValues[3] = {0, 0, 0}; // 脉冲长度
+int32_t test_num = 0; // 支持正负数�?�增�???????
+uint8_t dir_flag = 2; /*  方向标志 0: 顺时 1: 逆时 2: 未动*/
 
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* Prevent unused argument(s) compilation warning */
+  static uint8_t count = 0;
+  static uint8_t b_flag;
+  GPIO_PinState a_value = HAL_GPIO_ReadPin(EC11_A_GPIO_Port, EC11_A_Pin);
+  GPIO_PinState b_value = HAL_GPIO_ReadPin(EC11_B_GPIO_Port, EC11_B_Pin);
+
+  if (GPIO_Pin == EC11_A_Pin)
+  {
+    if (a_value == GPIO_PIN_RESET && count == 0)
+    {
+      b_flag = 0;
+      if (b_value)
+        b_flag = 1;
+      count = 1;
+    }
+
+    if (a_value == GPIO_PIN_SET && count == 1)
+    {
+      if (b_value == GPIO_PIN_RESET && b_flag == 1)
+      { // 逆时针转
+        test_num--;
+        timeValues[optionIndex] = timeValues[optionIndex] > 0 ? timeValues[optionIndex] - 1 : 0;
+        dir_flag = 1;
+        logger_info("dir_flag = %d", dir_flag);
+      }
+      if (b_value && b_flag == 0)
+      { // 顺时针转
+        test_num++;
+        timeValues[optionIndex]++;
+        dir_flag = 0;
+        logger_info("dir_flag = %d", dir_flag);
+      }
+      count = 0;
+    }
+  }
+}
 /* USER CODE END 2 */

@@ -61,6 +61,14 @@ void Error_Handler(void);
 #define USER_BUTTON_GPIO_Port GPIOC
 #define SPI1_CS_Pin GPIO_PIN_4
 #define SPI1_CS_GPIO_Port GPIOA
+#define EC11_A_Pin GPIO_PIN_0
+#define EC11_A_GPIO_Port GPIOB
+#define EC11_A_EXTI_IRQn EXTI0_IRQn
+#define EC11_B_Pin GPIO_PIN_1
+#define EC11_B_GPIO_Port GPIOB
+#define EC11_B_EXTI_IRQn EXTI1_IRQn
+#define EC11_KEY_Pin GPIO_PIN_2
+#define EC11_KEY_GPIO_Port GPIOB
 #define USER_LED_Pin GPIO_PIN_6
 #define USER_LED_GPIO_Port GPIOC
 
