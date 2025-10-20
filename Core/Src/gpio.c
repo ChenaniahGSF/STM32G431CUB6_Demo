@@ -99,10 +99,9 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 2 */
-int optionIndex = 0;           // 菜单索引
-int timeValues[3] = {0, 0, 0}; // 脉冲长度
-int32_t test_num = 0; // 支持正负数�?�增�???????
-uint8_t dir_flag = 2; /*  方向标志 0: 顺时 1: 逆时 2: 未动*/
+int32_t rolling_absolute = 0;
+int32_t rolling_counter = 0;  //Clockwise +, counterclockwise -
+uint8_t rolling_flag = 2; //Clockwise:0, counterclockwise:1, initial:2
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -125,18 +124,20 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     if (a_value == GPIO_PIN_SET && count == 1)
     {
       if (b_value == GPIO_PIN_RESET && b_flag == 1)
-      { // 逆时针转
-        test_num--;
-        timeValues[optionIndex] = timeValues[optionIndex] > 0 ? timeValues[optionIndex] - 1 : 0;
-        dir_flag = 1;
-        logger_info("dir_flag = %d", dir_flag);
+      {
+    	// Clockwise
+    	rolling_counter++;
+    	rolling_absolute++;
+        rolling_flag = 0;
+        logger_info("rolling_flag = %d, rolling_counter = %d, rolling_absolute = %d", rolling_flag, rolling_counter, rolling_absolute);
       }
       if (b_value && b_flag == 0)
-      { // 顺时针转
-        test_num++;
-        timeValues[optionIndex]++;
-        dir_flag = 0;
-        logger_info("dir_flag = %d", dir_flag);
+      {
+      	// counterclockwise
+      	rolling_counter--;
+      	rolling_absolute = (rolling_absolute > 0) ? (rolling_absolute - 1) : 0;
+        rolling_flag = 1;
+        logger_info("rolling_flag = %d, rolling_counter = %d, rolling_absolute = %d", rolling_flag, rolling_counter, rolling_absolute);
       }
       count = 0;
     }
