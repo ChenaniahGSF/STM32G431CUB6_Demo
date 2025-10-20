@@ -104,6 +104,27 @@ void HAL_RNG_MspDeInit(RNG_HandleTypeDef* rngHandle)
 }
 
 /* USER CODE BEGIN 1 */
+void HAL_RNG_ReadyDataCallback(RNG_HandleTypeDef *hrng, uint32_t random32bit) {
+  int i;
+  uint8_t* temp;
+  lwrb_sz_t free = 0;
+
+  if (hrng->Instance == RNG) {
+    temp = (uint8_t*)&random32bit;
+
+    free = lwrb_get_free(&lwrb_rng);
+    if(free >= 4) {
+      lwrb_write(&lwrb_rng, temp, 4);
+      HAL_RNG_GenerateRandomNumber_IT(hrng);
+    } else {
+      for(i=0; i<free; i++) {
+        lwrb_write(&lwrb_rng, &temp[i], 1);
+      }
+    }
+
+  }
+}
+
 void random_init(void) {
   lwrb_init(&lwrb_rng, rng_buffer, sizeof(rng_buffer));
   HAL_RNG_GenerateRandomNumber_IT(&hrng);
@@ -139,27 +160,6 @@ void random_get(uint8_t* out, size_t osize) {
     remain_size -= copy_size;
   }
   __HAL_RNG_ENABLE_IT(&hrng);
-}
-
-void HAL_RNG_ReadyDataCallback(RNG_HandleTypeDef *hrng, uint32_t random32bit) {
-  int i;
-  uint8_t* temp;
-  lwrb_sz_t free = 0;
-
-  if (hrng->Instance == RNG) {
-    temp = (uint8_t*)&random32bit;
-
-    free = lwrb_get_free(&lwrb_rng);
-    if(free >= 4) {
-      lwrb_write(&lwrb_rng, temp, 4);
-      HAL_RNG_GenerateRandomNumber_IT(hrng);
-    } else {
-      for(i=0; i<free; i++) {
-        lwrb_write(&lwrb_rng, &temp[i], 1);
-      }
-    }
-
-  }
 }
 
 /* USER CODE END 1 */

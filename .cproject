@@ -86,9 +86,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry excluding="MultiButton/examples/|lwprintf/src/system/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Third_Party"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="MultiButton/examples/|lwprintf/src/system/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Third_Party"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
