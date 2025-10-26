@@ -139,6 +139,16 @@ void xmodem_receive_mainfuncion(void) {
         } else {
           status |= X_ERROR;
         }
+        if((xmodem_receive_buffer[X_PACKET_PROTOCOL_SIZE] == 0x00) && (xmodem_receive_buffer[X_PACKET_PROTOCOL_SIZE+1] == 0xFF) && (xmodem_receive_buffer[X_PACKET_PROTOCOL_SIZE+X_PACKET_NUMBER_SIZE] != 0x00)) {
+          xmodem_debug("ymodem first frame");
+          xmodem_hex(xmodem_receive_buffer, xmodem_received_size);
+          xmodem_start_send_echo();
+        }
+        if((xmodem_receive_buffer[X_PACKET_PROTOCOL_SIZE] == 0x00) && (xmodem_receive_buffer[X_PACKET_PROTOCOL_SIZE+1] == 0xFF) && (xmodem_receive_buffer[X_PACKET_PROTOCOL_SIZE+X_PACKET_NUMBER_SIZE] == 0x00)) {
+          xmodem_debug("ymodem end zero frame");
+          xmodem_hex(xmodem_receive_buffer, xmodem_received_size);
+          xmodem_start_send_echo();
+        }
         if((xmodem_received_size-package_size) != (X_PACKET_PROTOCOL_SIZE+X_PACKET_NUMBER_SIZE+X_PACKET_CRC_SIZE)) {
           status |= X_ERROR_NUMBER;
         }
