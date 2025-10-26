@@ -33,6 +33,7 @@
 #include "multi_button_user.h"
 #include "lwshell/lwshell_user.h"
 #include "smarttimer_user.h"
+#include "xmodem.h"
 //#include "ssd1306_tests.h"
 
 /* USER CODE END Includes */
@@ -107,6 +108,7 @@ int main(void)
   MX_RNG_Init();
   MX_I2C2_Init();
   MX_RTC_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   random_init();
@@ -132,6 +134,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     //HAL_Delay(5000);
     stim_mainloop();
+    xmodem_receive_mainfuncion();
   }
   /* USER CODE END 3 */
 }
