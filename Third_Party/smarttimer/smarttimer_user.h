@@ -20,5 +20,6 @@ struct date{
 
 void set_timetick (void);
 void print_data_time(void);
+void set_can_message(void);
 
 #endif /* SMARTTIMER_SMARTTIMER_USER_H_ */

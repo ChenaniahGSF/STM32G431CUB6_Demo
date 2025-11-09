@@ -8,6 +8,7 @@
 #include "smarttimer_user.h"
 #include "logger.h"
 #include "rtc.h"
+#include "fdcan.h"
 
 struct date m_date;
 const char datestr[] = "2025:10:12#13:02:00";
@@ -102,3 +103,17 @@ void print_data_time(void) {
   logger_info("Time: %02d:%02d:%02d",
          sTime.Hours, sTime.Minutes, sTime.Seconds);
 }
+
+uint32_t can_id = 0x113;
+uint8_t can_tx_data[8] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+
+void send_can_message(void) {
+  if(FDCAN1_Send_Msg(can_id, can_tx_data, sizeof(can_tx_data)) != 0) {
+    logger_error("can send failed");
+  }
+}
+
+void set_can_message(void) {
+  stim_loop(1000, send_can_message, STIM_LOOP_FOREVER);
+}
+

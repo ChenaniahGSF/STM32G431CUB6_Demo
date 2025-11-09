@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "dma.h"
+#include "fdcan.h"
 #include "i2c.h"
 #include "rng.h"
 #include "rtc.h"
@@ -80,6 +81,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
   stim_init();
   //set_timetick();
+  set_can_message();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -109,6 +111,7 @@ int main(void)
   MX_I2C2_Init();
   MX_RTC_Init();
   MX_USART2_UART_Init();
+  MX_FDCAN1_Init();
   /* USER CODE BEGIN 2 */
 
   random_init();
